@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8x8 Strategy Arena</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f1a;
+            --bg-panel: #1a1a2e;
+            --bg-card: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --accent-green: #4ecdc4;
+            --accent-gold: #ffd93d;
+            --text: #eee;
+            --text-dim: #888;
+            --text-muted: #555;
+            --cell-empty: #2a2a4a;
+            --cell-filled: #4ecdc4;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+
+        /* Header */
+        header {
+            background: var(--bg-panel);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 { font-size: 1.3rem; color: var(--text); font-weight: 600; }
+        .subtitle { color: var(--text-dim); font-size: 0.8rem; }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+        .status-dot.connected { background: var(--accent-green); }
+        .status-dot.running { background: var(--accent); animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr 220px;
+            height: calc(100vh - 50px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-panel);
+            padding: 16px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .section { margin-bottom: 20px; }
+
+        .section-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Mode Selection */
+        .mode-selector {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mode-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .mode-option:hover { background: rgba(255,255,255,0.03); }
+        .mode-option.selected { border-color: var(--accent); background: rgba(233,69,96,0.1); }
+
+        .mode-radio {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--text-dim);
+            border-radius: 50%;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mode-option.selected .mode-radio {
+            border-color: var(--accent);
+        }
+
+        .mode-option.selected .mode-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .mode-info { flex: 1; }
+        .mode-name { font-weight: 600; margin-bottom: 2px; }
+        .mode-desc { font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
+
+        /* Strategy List */
+        .strategy-list {
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .strategy-item {
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+
+        .strategy-item:hover { border-color: var(--text-muted); }
+        .strategy-item.selected { border-color: var(--accent-green); background: rgba(78,205,196,0.1); }
+
+        .strategy-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .strategy-name { font-weight: 500; font-size: 0.85rem; }
+        .strategy-category {
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            color: var(--text-dim);
+        }
+
+        .strategy-short { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; }
+
+        .strategy-detail {
+            display: none;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .strategy-item.expanded .strategy-detail { display: block; }
+
+        .strategy-complexity {
+            margin-top: 6px;
+            font-family: monospace;
+            color: var(--accent-green);
+        }
+
+        /* Controls */
+        .control-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .control-group { flex: 1; }
+
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-light); }
+        .btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+        .btn-secondary { background: var(--bg-card); color: var(--text); margin-top: 8px; border: 1px solid var(--border); }
+
+        .progress-bar {
+            height: 3px;
+            background: var(--bg-card);
+            border-radius: 2px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Main Area */
+        main {
+            padding: 16px;
+            overflow-y: auto;
+            background: var(--bg-dark);
+        }
+
+        /* Battle Grid */
+        .battle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        /* Game Card */
+        .game-card {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .game-card.winner { border-color: var(--accent-gold); }
+        .game-card.loser { opacity: 0.5; }
+        .game-card.eliminated {
+            border-color: var(--accent);
+            background: rgba(233,69,96,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .card-name { font-weight: 600; font-size: 0.9rem; }
+        .card-score { font-size: 1.4rem; font-weight: 700; color: var(--accent-light); }
+
+        /* Mini Board */
+        .mini-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 1px;
+            background: #000;
+            padding: 2px;
+            border-radius: 4px;
+            aspect-ratio: 1;
+        }
+
+        .mini-board .cell {
+            border-radius: 1px;
+            transition: background 0.1s;
+        }
+
+        .mini-board .cell.empty { background: var(--cell-empty); }
+        .mini-board .cell.filled { background: var(--cell-filled); }
+
+        /* Card Stats */
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .card-stat { text-align: center; }
+        .card-stat-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+        .card-explanation {
+            margin-top: 8px;
+            padding: 6px 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            font-family: monospace;
+            min-height: 28px;
+        }
+
+        /* Right Panel - Leaderboard */
+        .right-panel {
+            background: var(--bg-panel);
+            padding: 16px;
+            border-left: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .leaderboard-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: var(--bg-card);
+            border-radius: 4px;
+        }
+
+        .lb-rank {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: var(--text-muted);
+            color: var(--bg-dark);
+        }
+
+        .lb-rank.r1 { background: var(--accent-gold); }
+        .lb-rank.r2 { background: #c0c0c0; }
+        .lb-rank.r3 { background: #cd7f32; }
+
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lb-stats { font-size: 0.65rem; color: var(--text-dim); }
+
+        .lb-score { font-weight: 700; color: var(--accent-light); font-size: 0.85rem; }
+
+        /* Game Info */
+        .game-info-panel {
+            background: var(--bg-card);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .game-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            padding: 4px 0;
+        }
+
+        .game-info-label { color: var(--text-dim); }
+        .game-info-value { font-weight: 600; }
+
+        /* Winner Overlay */
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .winner-overlay.show { display: flex; }
+
+        .winner-card {
+            background: var(--bg-panel);
+            border: 2px solid var(--accent-gold);
+            border-radius: 12px;
+            padding: 32px 48px;
+            text-align: center;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .winner-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+        .winner-name { font-size: 1.8rem; font-weight: 700; color: var(--accent-gold); margin: 8px 0; }
+        .winner-score { font-size: 1rem; color: var(--text-dim); }
+
+        .winner-close {
+            margin-top: 20px;
+            padding: 8px 24px;
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>8x8 Strategy Arena</h1>
+            <div class="subtitle">Compare AI strategies head-to-head</div>
+        </div>
+        <div class="status-indicator">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Disconnected</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="section">
+                <div class="section-header">Battle Mode</div>
+                <div class="mode-selector">
+                    <div class="mode-option selected" data-mode="battle_royale">
+                        <div class="mode-radio"></div>
+                        <div class="mode-info">
+                            <div class="mode-name">Battle Royale</div>
+                            <div class="mode-desc">All strategies play the same game simultaneously. Same starting blocks, same seed. See who scores highest.</div>
+                        </div>
+                    </div>
+                    <div class="mode-option" data-mode="tournament">
+                        <div class="mode-radio"></div>
+                        <div class="mode-info">
+                            <div class="mode-name">Tournament</div>
+                            <div class="mode-desc">Round-robin format. Each strategy plays against every other strategy. Wins determine ranking.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">Strategies (click to select, double-click for details)</div>
+                <div class="strategy-list" id="strategy-list"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">Settings</div>
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>Games</label>
+                        <input type="number" id="num-games" value="5" min="1" max="50">
+                    </div>
+                    <div class="control-group">
+                        <label>Speed</label>
+                        <select id="speed">
+                            <option value="0.3">Slow</option>
+                            <option value="0.1" selected>Normal</option>
+                            <option value="0.03">Fast</option>
+                            <option value="0">Instant</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="start-btn">Start Battle</button>
+                <button class="btn-secondary" id="stop-btn" disabled>Stop</button>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Battle Area -->
+        <main>
+            <div class="battle-grid" id="battle-grid">
+                <div style="color: var(--text-dim); text-align: center; padding: 40px;">
+                    Select strategies and click Start Battle
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Panel - Leaderboard -->
+        <aside class="right-panel">
+            <div class="leaderboard-title">Current Game</div>
+            <div class="game-info-panel" id="game-info">
+                <div class="game-info-row">
+                    <span class="game-info-label">Game</span>
+                    <span class="game-info-value" id="current-game">-</span>
+                </div>
+                <div class="game-info-row">
+                    <span class="game-info-label">Turn</span>
+                    <span class="game-info-value" id="current-turn">-</span>
+                </div>
+            </div>
+
+            <div class="leaderboard-title">Leaderboard</div>
+            <div id="leaderboard"></div>
+        </aside>
+    </div>
+
+    <!-- Winner Overlay -->
+    <div class="winner-overlay" id="winner-overlay">
+        <div class="winner-card">
+            <div class="winner-label">Winner</div>
+            <div class="winner-name" id="winner-name"></div>
+            <div class="winner-score" id="winner-score"></div>
+            <button class="winner-close" onclick="closeWinner()">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let selectedStrategies = new Set(['greedy', 'survivalist']);
+        let isRunning = false;
+        let mode = 'battle_royale';
+        let strategies = [];
+        let gameCards = {};
+        let maxTurn = 0;
+
+        const strategyList = document.getElementById('strategy-list');
+        const battleGrid = document.getElementById('battle-grid');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const progressFill = document.getElementById('progress-fill');
+        const leaderboard = document.getElementById('leaderboard');
+        const winnerOverlay = document.getElementById('winner-overlay');
+
+        async function loadStrategies() {
+            try {
+                const resp = await fetch('/api/strategies');
+                const data = await resp.json();
+                strategies = data.strategies;
+                renderStrategyList();
+            } catch (e) {
+                console.error('Failed to load strategies:', e);
+            }
+        }
+
+        function renderStrategyList() {
+            strategyList.innerHTML = '';
+            strategies.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'strategy-item' + (selectedStrategies.has(s.id) ? ' selected' : '');
+                item.dataset.id = s.id;
+                item.innerHTML = `
+                    <div class="strategy-header">
+                        <span class="strategy-name">${s.name}</span>
+                        <span class="strategy-category">${s.category}</span>
+                    </div>
+                    <div class="strategy-short">${s.short_desc}</div>
+                    <div class="strategy-detail">
+                        <div>${s.algorithm}</div>
+                        <div class="strategy-complexity">Complexity: ${s.complexity}</div>
+                    </div>
+                `;
+                item.onclick = (e) => {
+                    if (e.detail === 2) {
+                        item.classList.toggle('expanded');
+                    } else {
+                        toggleStrategy(s.id);
+                    }
+                };
+                strategyList.appendChild(item);
+            });
+        }
+
+        function toggleStrategy(id) {
+            if (selectedStrategies.has(id)) {
+                if (selectedStrategies.size > 1) selectedStrategies.delete(id);
+            } else {
+                selectedStrategies.add(id);
+            }
+            renderStrategyList();
+        }
+
+        document.querySelectorAll('.mode-option').forEach(opt => {
+            opt.onclick = () => {
+                document.querySelectorAll('.mode-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                mode = opt.dataset.mode;
+            };
+        });
+
+        function createGameCard(strategyId) {
+            const s = strategies.find(x => x.id === strategyId) || { id: strategyId, name: strategyId };
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.id = `card-${strategyId}`;
+            card.innerHTML = `
+                <div class="card-header">
+                    <span class="card-name">${s.name}</span>
+                    <span class="card-score" id="score-${strategyId}">0</span>
+                </div>
+                <div class="mini-board" id="board-${strategyId}">
+                    ${Array(64).fill('<div class="cell empty"></div>').join('')}
+                </div>
+                <div class="card-stats">
+                    <div class="card-stat">
+                        <div class="card-stat-value" id="combo-${strategyId}">0x</div>
+                        <div>Combo</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value" id="lines-${strategyId}">0</div>
+                        <div>Lines</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value" id="turns-${strategyId}">0</div>
+                        <div>Turns</div>
+                    </div>
+                </div>
+                <div class="card-explanation" id="explain-${strategyId}">Ready</div>
+            `;
+            return card;
+        }
+
+        function updateBoard(strategyId, grid) {
+            const board = document.getElementById(`board-${strategyId}`);
+            if (!board) return;
+            const cells = board.querySelectorAll('.cell');
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    cells[r * 8 + c].className = 'cell ' + (grid[r][c] ? 'filled' : 'empty');
+                }
+            }
+        }
+
+        function updateLeaderboard(rankings) {
+            leaderboard.innerHTML = rankings.map((r, i) => {
+                const s = strategies.find(x => x.id === r.strategy_id) || { name: r.strategy_id };
+                const rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+                return `
+                    <div class="leaderboard-row">
+                        <div class="lb-rank ${rankClass}">${r.rank}</div>
+                        <div class="lb-info">
+                            <div class="lb-name">${s.name}</div>
+                            <div class="lb-stats">${r.wins}W | Avg: ${Math.round(r.avg_score)}</div>
+                        </div>
+                        <div class="lb-score">${Math.round(r.avg_score)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showWinner(strategyId, score) {
+            const s = strategies.find(x => x.id === strategyId) || { name: strategyId };
+            document.getElementById('winner-name').textContent = s.name;
+            document.getElementById('winner-score').textContent = `Average Score: ${Math.round(score)}`;
+            winnerOverlay.classList.add('show');
+        }
+
+        function closeWinner() {
+            winnerOverlay.classList.remove('show');
+        }
+
+        function connect() {
+            ws = new WebSocket(`ws://${window.location.host}/ws/battle`);
+
+            ws.onopen = () => {
+                statusDot.className = 'status-dot connected';
+                statusText.textContent = 'Connected';
+                startBtn.disabled = false;
+            };
+
+            ws.onclose = () => {
+                statusDot.className = 'status-dot';
+                statusText.textContent = 'Disconnected';
+                isRunning = false;
+                updateUI();
+                setTimeout(connect, 2000);
+            };
+
+            ws.onmessage = (e) => handleMessage(JSON.parse(e.data));
+        }
+
+        function handleMessage(data) {
+            switch (data.type) {
+                case 'battle_start':
+                    battleGrid.innerHTML = '';
+                    gameCards = {};
+                    maxTurn = 0;
+                    data.strategies.forEach(sid => {
+                        const card = createGameCard(sid);
+                        battleGrid.appendChild(card);
+                        gameCards[sid] = card;
+                    });
+                    leaderboard.innerHTML = '';
+                    break;
+
+                case 'game_start':
+                    document.getElementById('current-game').textContent = `${data.game_num} / ${document.getElementById('num-games').value}`;
+                    Object.keys(gameCards).forEach(sid => {
+                        const card = gameCards[sid];
+                        card.classList.remove('winner', 'loser', 'eliminated');
+                        document.getElementById(`score-${sid}`).textContent = '0';
+                        document.getElementById(`combo-${sid}`).textContent = '0x';
+                        document.getElementById(`lines-${sid}`).textContent = '0';
+                        document.getElementById(`turns-${sid}`).textContent = '0';
+                        document.getElementById(`explain-${sid}`).textContent = 'Starting...';
+                    });
+                    if (data.states) {
+                        Object.entries(data.states).forEach(([sid, state]) => {
+                            updateBoard(sid, state.grid);
+                        });
+                    }
+                    maxTurn = 0;
+                    break;
+
+                case 'turn':
+                    Object.entries(data.results).forEach(([sid, r]) => {
+                        updateBoard(sid, r.state.grid);
+                        document.getElementById(`score-${sid}`).textContent = r.state.score;
+                        document.getElementById(`combo-${sid}`).textContent = r.combo + 'x';
+                        document.getElementById(`turns-${sid}`).textContent = r.state.turn_count;
+                        document.getElementById(`explain-${sid}`).textContent = r.explanation || '';
+                        maxTurn = Math.max(maxTurn, r.state.turn_count);
+
+                        if (r.game_over) {
+                            gameCards[sid].classList.add('eliminated');
+                            document.getElementById(`explain-${sid}`).textContent = 'Game Over';
+                        }
+                    });
+                    document.getElementById('current-turn').textContent = maxTurn;
+                    break;
+
+                case 'game_end':
+                    const winnerId = data.winner || (data.tied ? data.tied[0] : null);
+                    Object.keys(gameCards).forEach(sid => {
+                        const card = gameCards[sid];
+                        card.classList.remove('eliminated');
+                        if (sid === winnerId && !data.tied) {
+                            card.classList.add('winner');
+                        } else if (data.winner) {
+                            card.classList.add('loser');
+                        }
+                    });
+
+                    Object.entries(data.details).forEach(([sid, d]) => {
+                        document.getElementById(`lines-${sid}`).textContent = d.lines_cleared;
+                    });
+
+                    if (data.overall_stats) {
+                        const rankings = Object.entries(data.overall_stats)
+                            .map(([sid, s]) => ({
+                                strategy_id: sid,
+                                rank: 0,
+                                wins: s.wins,
+                                avg_score: s.total_score / s.games
+                            }))
+                            .sort((a, b) => b.wins - a.wins || b.avg_score - a.avg_score);
+                        rankings.forEach((r, i) => r.rank = i + 1);
+                        updateLeaderboard(rankings);
+                    }
+
+                    const numGames = parseInt(document.getElementById('num-games').value);
+                    progressFill.style.width = (data.game_num / numGames * 100) + '%';
+                    break;
+
+                case 'battle_complete':
+                    updateLeaderboard(data.rankings);
+                    if (data.rankings.length > 0 && data.rankings[0].wins > 0) {
+                        showWinner(data.rankings[0].strategy_id, data.rankings[0].avg_score);
+                    }
+                    isRunning = false;
+                    updateUI();
+                    break;
+
+                case 'tournament_start':
+                    document.getElementById('current-game').textContent = 'Tournament';
+                    break;
+
+                case 'match_start':
+                    document.getElementById('current-turn').textContent = `Match ${data.match_num}`;
+                    break;
+
+                case 'match_end':
+                    const standings = Object.entries(data.current_standings)
+                        .map(([sid, s]) => ({
+                            strategy_id: sid,
+                            rank: 0,
+                            wins: s.wins,
+                            avg_score: s.total_score / s.games
+                        }))
+                        .sort((a, b) => b.wins - a.wins || b.avg_score - a.avg_score);
+                    standings.forEach((r, i) => r.rank = i + 1);
+                    updateLeaderboard(standings);
+                    progressFill.style.width = (data.match_num / (selectedStrategies.size * (selectedStrategies.size - 1) / 2) * 100) + '%';
+                    break;
+
+                case 'tournament_complete':
+                    updateLeaderboard(data.rankings);
+                    if (data.rankings.length > 0) {
+                        showWinner(data.rankings[0].strategy_id, data.rankings[0].avg_score);
+                    }
+                    isRunning = false;
+                    updateUI();
+                    break;
+
+                case 'error':
+                    alert('Error: ' + data.message);
+                    isRunning = false;
+                    updateUI();
+                    break;
+            }
+        }
+
+        function startBattle() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                connect();
+                setTimeout(startBattle, 500);
+                return;
+            }
+
+            isRunning = true;
+            updateUI();
+            statusDot.className = 'status-dot running';
+            statusText.textContent = 'Running';
+            progressFill.style.width = '0%';
+
+            ws.send(JSON.stringify({
+                mode: mode,
+                strategies: Array.from(selectedStrategies),
+                speed: parseFloat(document.getElementById('speed').value),
+                num_games: parseInt(document.getElementById('num-games').value)
+            }));
+        }
+
+        function stopBattle() {
+            if (ws) ws.close();
+            isRunning = false;
+            updateUI();
+        }
+
+        function updateUI() {
+            startBtn.disabled = isRunning;
+            stopBtn.disabled = !isRunning;
+        }
+
+        startBtn.onclick = startBattle;
+        stopBtn.onclick = stopBattle;
+        loadStrategies();
+        connect();
+    </script>
+</body>
+</html>

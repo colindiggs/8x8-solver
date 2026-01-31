@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8x8 Strategy Arena</title>
+    <style>
+        :root {
+            --bg-dark: #0f0f1a;
+            --bg-panel: #1a1a2e;
+            --bg-card: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --accent-green: #4ecdc4;
+            --accent-gold: #ffd93d;
+            --text: #eee;
+            --text-dim: #888;
+            --text-muted: #555;
+            --cell-empty: #2a2a4a;
+            --cell-filled: #4ecdc4;
+            --border: rgba(255,255,255,0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            font-size: 14px;
+        }
+        header {
+            background: var(--bg-panel);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        h1 { font-size: 1.3rem; color: var(--text); font-weight: 600; }
+        .subtitle { color: var(--text-dim); font-size: 0.8rem; }
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr 220px;
+            height: calc(100vh - 50px);
+        }
+        .sidebar {
+            background: var(--bg-panel);
+            padding: 16px;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+        }
+        .section { margin-bottom: 20px; }
+        .section-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .mode-selector {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .mode-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .mode-option:hover { background: rgba(255,255,255,0.03); }
+        .mode-option.selected { border-color: var(--accent); background: rgba(233,69,96,0.1); }
+        .mode-radio {
+            width: 16px; height: 16px;
+            border: 2px solid var(--text-dim);
+            border-radius: 50%;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mode-option.selected .mode-radio { border-color: var(--accent); }
+        .mode-option.selected .mode-radio::after {
+            content: '';
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .mode-info { flex: 1; }
+        .mode-name { font-weight: 600; margin-bottom: 2px; }
+        .mode-desc { font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
+        .strategy-list { max-height: 280px; overflow-y: auto; }
+        .strategy-item {
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+        .strategy-item:hover { border-color: var(--text-muted); }
+        .strategy-item.selected { border-color: var(--accent-green); background: rgba(78,205,196,0.1); }
+        .strategy-header { display: flex; justify-content: space-between; align-items: center; }
+        .strategy-name { font-weight: 500; font-size: 0.85rem; }
+        .strategy-category {
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+            color: var(--text-dim);
+        }
+        .strategy-short { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; }
+        .strategy-detail {
+            display: none;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .strategy-item.expanded .strategy-detail { display: block; }
+        .strategy-complexity { margin-top: 6px; font-family: monospace; color: var(--accent-green); }
+        .control-row { display: flex; gap: 8px; margin-bottom: 12px; }
+        .control-group { flex: 1; }
+        label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-light); }
+        .btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; }
+        .btn-secondary { background: var(--bg-card); color: var(--text); margin-top: 8px; border: 1px solid var(--border); }
+        .progress-bar { height: 3px; background: var(--bg-card); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        main { padding: 16px; overflow-y: auto; background: var(--bg-dark); }
+        .battle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+        .game-card {
+            background: var(--bg-panel);
+            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .game-card.winner { border-color: var(--accent-gold); }
+        .game-card.loser { opacity: 0.5; }
+        .game-card.eliminated { border-color: var(--accent); background: rgba(233,69,96,0.1); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .card-name { font-weight: 600; font-size: 0.9rem; }
+        .card-score { font-size: 1.4rem; font-weight: 700; color: var(--accent-light); }
+        .mini-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 1px;
+            background: #000;
+            padding: 2px;
+            border-radius: 4px;
+            aspect-ratio: 1;
+        }
+        .mini-board .cell { border-radius: 1px; transition: background 0.1s; }
+        .mini-board .cell.empty { background: var(--cell-empty); }
+        .mini-board .cell.filled { background: var(--cell-filled); }
+        .card-stats { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7rem; color: var(--text-dim); }
+        .card-stat { text-align: center; }
+        .card-stat-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+        .card-explanation {
+            margin-top: 8px;
+            padding: 6px 8px;
+            background: var(--bg-card);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            font-family: monospace;
+            min-height: 28px;
+        }
+        .right-panel { background: var(--bg-panel); padding: 16px; border-left: 1px solid var(--border); overflow-y: auto; }
+        .leaderboard-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
+        .leaderboard-row { display: flex; align-items: center; gap: 8px; padding: 8px; margin-bottom: 4px; background: var(--bg-card); border-radius: 4px; }
+        .lb-rank { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.7rem; font-weight: 700; background: var(--text-muted); color: var(--bg-dark); }
+        .lb-rank.r1 { background: var(--accent-gold); }
+        .lb-rank.r2 { background: #c0c0c0; }
+        .lb-rank.r3 { background: #cd7f32; }
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lb-stats { font-size: 0.65rem; color: var(--text-dim); }
+        .lb-score { font-weight: 700; color: var(--accent-light); font-size: 0.85rem; }
+        .game-info-panel { background: var(--bg-card); border-radius: 6px; padding: 12px; margin-bottom: 16px; }
+        .game-info-row { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 4px 0; }
+        .game-info-label { color: var(--text-dim); }
+        .game-info-value { font-weight: 600; }
+        .winner-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .winner-overlay.show { display: flex; }
+        .winner-card { background: var(--bg-panel); border: 2px solid var(--accent-gold); border-radius: 12px; padding: 32px 48px; text-align: center; animation: popIn 0.3s ease-out; }
+        @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .winner-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
+        .winner-name { font-size: 1.8rem; font-weight: 700; color: var(--accent-gold); margin: 8px 0; }
+        .winner-score { font-size: 1rem; color: var(--text-dim); }
+        .winner-close { margin-top: 20px; padding: 8px 24px; background: var(--accent-gold); color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar, .right-panel { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>8x8 Strategy Arena</h1>
+            <div class="subtitle">Compare AI strategies head-to-head</div>
+        </div>
+        <div style="color: var(--accent-green); font-size: 0.8rem;">Static Demo</div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="section">
+                <div class="section-header">Battle Mode</div>
+                <div class="mode-selector">
+                    <div class="mode-option selected" data-mode="battle">
+                        <div class="mode-radio"></div>
+                        <div class="mode-info">
+                            <div class="mode-name">Battle Royale</div>
+                            <div class="mode-desc">All strategies play the same game simultaneously with identical block sequences.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <div class="section-header">Strategies (click to select)</div>
+                <div class="strategy-list" id="strategy-list"></div>
+            </div>
+            <div class="section">
+                <div class="section-header">Settings</div>
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>Games</label>
+                        <input type="number" id="num-games" value="3" min="1" max="20">
+                    </div>
+                    <div class="control-group">
+                        <label>Speed</label>
+                        <select id="speed">
+                            <option value="200">Slow</option>
+                            <option value="50" selected>Normal</option>
+                            <option value="10">Fast</option>
+                            <option value="0">Instant</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary" id="start-btn">Start Battle</button>
+                <button class="btn-secondary" id="stop-btn" disabled>Stop</button>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+        </aside>
+        <main>
+            <div class="battle-grid" id="battle-grid">
+                <div style="color: var(--text-dim); text-align: center; padding: 40px;">Select strategies and click Start Battle</div>
+            </div>
+        </main>
+        <aside class="right-panel">
+            <div class="leaderboard-title">Current Game</div>
+            <div class="game-info-panel">
+                <div class="game-info-row"><span class="game-info-label">Game</span><span class="game-info-value" id="current-game">-</span></div>
+                <div class="game-info-row"><span class="game-info-label">Turn</span><span class="game-info-value" id="current-turn">-</span></div>
+            </div>
+            <div class="leaderboard-title">Leaderboard</div>
+            <div id="leaderboard"></div>
+        </aside>
+    </div>
+    <div class="winner-overlay" id="winner-overlay">
+        <div class="winner-card">
+            <div class="winner-label">Winner</div>
+            <div class="winner-name" id="winner-name"></div>
+            <div class="winner-score" id="winner-score"></div>
+            <button class="winner-close" onclick="closeWinner()">Continue</button>
+        </div>
+    </div>
+
+<script>
+// ============================================================================
+// GAME ENGINE (Ported from Python)
+// ============================================================================
+
+const BLOCKS = {
+    line_2h: [[1,1]],
+    line_3h: [[1,1,1]],
+    line_4h: [[1,1,1,1]],
+    line_2v: [[1],[1]],
+    line_3v: [[1],[1],[1]],
+    line_4v: [[1],[1],[1],[1]],
+    line_5v: [[1],[1],[1],[1],[1]],
+    square_2x2: [[1,1],[1,1]],
+    square_3x3: [[1,1,1],[1,1,1],[1,1,1]],
+    L_small_0: [[1,0],[1,1]],
+    L_small_90: [[1,1],[1,0]],
+    L_small_180: [[1,1],[0,1]],
+    L_small_270: [[0,1],[1,1]],
+    L_big_0: [[1,0],[1,0],[1,1]],
+    L_big_90: [[1,1,1],[1,0,0]],
+    L_big_180: [[1,1],[0,1],[0,1]],
+    L_big_270: [[0,0,1],[1,1,1]],
+    T_shape: [[0,1,0],[1,1,1]],
+    S_shape: [[0,1,1],[1,1,0]],
+    Z_shape: [[1,1,0],[0,1,1]]
+};
+
+const BLOCK_NAMES = Object.keys(BLOCKS);
+
+class SeededRandom {
+    constructor(seed) {
+        this.seed = seed % 2147483647;
+        if (this.seed <= 0) this.seed += 2147483646;
+    }
+    next() {
+        this.seed = (this.seed * 16807) % 2147483647;
+        return (this.seed - 1) / 2147483646;
+    }
+    choice(arr) {
+        return arr[Math.floor(this.next() * arr.length)];
+    }
+}
+
+class Board {
+    constructor() {
+        this.grid = Array(8).fill(null).map(() => Array(8).fill(0));
+    }
+    copy() {
+        const b = new Board();
+        b.grid = this.grid.map(row => [...row]);
+        return b;
+    }
+    canPlace(shape, row, col) {
+        for (let dr = 0; dr < shape.length; dr++) {
+            for (let dc = 0; dc < shape[0].length; dc++) {
+                if (shape[dr][dc]) {
+                    const r = row + dr, c = col + dc;
+                    if (r < 0 || r >= 8 || c < 0 || c >= 8 || this.grid[r][c]) return false;
+                }
+            }
+        }
+        return true;
+    }
+    place(shape, row, col) {
+        let cells = 0;
+        for (let dr = 0; dr < shape.length; dr++) {
+            for (let dc = 0; dc < shape[0].length; dc++) {
+                if (shape[dr][dc]) {
+                    this.grid[row + dr][col + dc] = 1;
+                    cells++;
+                }
+            }
+        }
+        return cells;
+    }
+    clearLines() {
+        let cleared = 0;
+        const rowsToClear = [], colsToClear = [];
+        for (let i = 0; i < 8; i++) {
+            if (this.grid[i].every(c => c === 1)) rowsToClear.push(i);
+            if (this.grid.every(row => row[i] === 1)) colsToClear.push(i);
+        }
+        for (const r of rowsToClear) {
+            for (let c = 0; c < 8; c++) this.grid[r][c] = 0;
+            cleared++;
+        }
+        for (const c of colsToClear) {
+            for (let r = 0; r < 8; r++) this.grid[r][c] = 0;
+            cleared++;
+        }
+        return cleared;
+    }
+    countEmpty() {
+        return this.grid.flat().filter(c => c === 0).length;
+    }
+}
+
+class Game {
+    constructor(seed) {
+        this.rng = new SeededRandom(seed || Date.now());
+        this.board = new Board();
+        this.score = 0;
+        this.combo = 0;
+        this.movesSinceClear = 0;
+        this.turn = 0;
+        this.gameOver = false;
+        this.blocks = this.generateBatch();
+    }
+    copy() {
+        const g = new Game(1);
+        g.rng = new SeededRandom(this.rng.seed);
+        g.board = this.board.copy();
+        g.score = this.score;
+        g.combo = this.combo;
+        g.movesSinceClear = this.movesSinceClear;
+        g.turn = this.turn;
+        g.gameOver = this.gameOver;
+        g.blocks = [...this.blocks];
+        return g;
+    }
+    generateBatch() {
+        return [0,1,2].map(() => this.rng.choice(BLOCK_NAMES));
+    }
+    getValidMoves() {
+        const moves = [];
+        for (let bi = 0; bi < this.blocks.length; bi++) {
+            if (!this.blocks[bi]) continue;
+            const shape = BLOCKS[this.blocks[bi]];
+            for (let r = 0; r <= 8 - shape.length; r++) {
+                for (let c = 0; c <= 8 - shape[0].length; c++) {
+                    if (this.board.canPlace(shape, r, c)) {
+                        moves.push({blockIdx: bi, row: r, col: c, shape});
+                    }
+                }
+            }
+        }
+        return moves;
+    }
+    makeMove(blockIdx, row, col) {
+        const blockName = this.blocks[blockIdx];
+        if (!blockName) return null;
+        const shape = BLOCKS[blockName];
+        if (!this.board.canPlace(shape, row, col)) return null;
+
+        const cells = this.board.place(shape, row, col);
+        const lines = this.board.clearLines();
+
+        let points = cells;
+        const isMulti = lines >= 2;
+        const prevCombo = this.combo;
+
+        if (lines > 0) {
+            for (let i = 0; i < lines; i++) {
+                this.combo++;
+                if (isMulti) {
+                    points += this.combo * 10;
+                } else if (this.combo === 1) {
+                    points += 10;
+                } else {
+                    points += 10 + this.combo * 10;
+                }
+            }
+            if (isMulti && this.combo > lines) points += 30;
+            this.movesSinceClear = 0;
+        } else {
+            this.movesSinceClear++;
+            if (this.movesSinceClear > 3) this.combo = 0;
+        }
+
+        this.score += points;
+        this.blocks[blockIdx] = null;
+        this.turn++;
+
+        if (this.blocks.every(b => !b)) {
+            this.blocks = this.generateBatch();
+        }
+
+        if (this.getValidMoves().length === 0) {
+            this.gameOver = true;
+        }
+
+        return { points, lines, combo: this.combo };
+    }
+}
+
+// ============================================================================
+// STRATEGIES (Ported from Python)
+// ============================================================================
+
+const STRATEGIES = {
+    random: {
+        name: "Random",
+        short_desc: "Uniformly random move selection",
+        algorithm: "Selects a valid move uniformly at random. Baseline for comparison.",
+        complexity: "O(n)",
+        category: "Baseline",
+        evaluate: (game, move) => Math.random()
+    },
+    greedy: {
+        name: "Greedy",
+        short_desc: "Maximizes immediate points per move",
+        algorithm: "Simulates each move and picks the one with highest immediate score gain.",
+        complexity: "O(n)",
+        category: "Greedy",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            return r ? r.points : -1000;
+        }
+    },
+    line_hunter: {
+        name: "Line Hunter",
+        short_desc: "Maximizes line clears per move",
+        algorithm: "Prioritizes moves that clear lines. Non-clearing moves score 0.",
+        complexity: "O(n)",
+        category: "Aggressive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            return r ? r.lines * 100 : -1000;
+        }
+    },
+    combo_chaser: {
+        name: "Combo Chaser",
+        short_desc: "Optimizes for combo streak maintenance",
+        algorithm: "Heavily weights moves that continue combo streaks. Penalizes combo breaks.",
+        complexity: "O(n)",
+        category: "Aggressive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            let score = 0;
+            if (r.lines > 0) {
+                score += r.combo * 20;
+                if (r.lines >= 2) score += 50;
+            } else if (game.combo > 0 && game.movesSinceClear >= 2) {
+                score -= 30;
+            }
+            return score;
+        }
+    },
+    survivalist: {
+        name: "Survivalist",
+        short_desc: "Maximizes board flexibility and survival",
+        algorithm: "Score = empty_cells * 2 + future_moves. Optimizes for game length.",
+        complexity: "O(n * m)",
+        category: "Defensive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            return sim.board.countEmpty() * 2 + sim.getValidMoves().length;
+        }
+    },
+    edge_hugger: {
+        name: "Edge Hugger",
+        short_desc: "Prioritizes edge and corner placement",
+        algorithm: "Scores cells touching board perimeter. Corners=3, Edges=2.",
+        complexity: "O(n)",
+        category: "Positional",
+        evaluate: (game, move) => {
+            let score = 0;
+            for (let dr = 0; dr < move.shape.length; dr++) {
+                for (let dc = 0; dc < move.shape[0].length; dc++) {
+                    if (move.shape[dr][dc]) {
+                        const r = move.row + dr, c = move.col + dc;
+                        const isCorner = (r === 0 || r === 7) && (c === 0 || c === 7);
+                        const isEdge = r === 0 || r === 7 || c === 0 || c === 7;
+                        if (isCorner) score += 3;
+                        else if (isEdge) score += 2;
+                    }
+                }
+            }
+            const sim = game.copy();
+            const res = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (res && res.lines > 0) score += res.lines * 5;
+            return score;
+        }
+    },
+    center: {
+        name: "Center Control",
+        short_desc: "Minimizes distance from board center",
+        algorithm: "Calculates Manhattan distance from cells to center (3.5, 3.5).",
+        complexity: "O(n)",
+        category: "Positional",
+        evaluate: (game, move) => {
+            let totalDist = 0, cells = 0;
+            for (let dr = 0; dr < move.shape.length; dr++) {
+                for (let dc = 0; dc < move.shape[0].length; dc++) {
+                    if (move.shape[dr][dc]) {
+                        const r = move.row + dr, c = move.col + dc;
+                        totalDist += Math.abs(r - 3.5) + Math.abs(c - 3.5);
+                        cells++;
+                    }
+                }
+            }
+            return 7 - (totalDist / cells);
+        }
+    },
+    compactor: {
+        name: "Compactor",
+        short_desc: "Maximizes cell adjacency/clustering",
+        algorithm: "Counts orthogonal adjacencies between filled cells.",
+        complexity: "O(n + 64)",
+        category: "Positional",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            let adj = 0;
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (sim.board.grid[row][col]) {
+                        [[0,1],[1,0]].forEach(([dr,dc]) => {
+                            const nr = row+dr, nc = col+dc;
+                            if (nr < 8 && nc < 8 && sim.board.grid[nr][nc]) adj++;
+                        });
+                    }
+                }
+            }
+            return adj + (r.lines * 20);
+        }
+    },
+    holes_avoider: {
+        name: "Holes Avoider",
+        short_desc: "Minimizes trapped empty cells",
+        algorithm: "Counts empty cells with 3+ filled neighbors. Score = -10 * holes.",
+        complexity: "O(n + 64)",
+        category: "Defensive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            let holes = 0;
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (!sim.board.grid[row][col]) {
+                        let neighbors = 0;
+                        [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc]) => {
+                            const nr = row+dr, nc = col+dc;
+                            if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || sim.board.grid[nr]?.[nc]) neighbors++;
+                        });
+                        if (neighbors >= 3) holes++;
+                    }
+                }
+            }
+            return -holes * 10 + r.lines * 30;
+        }
+    },
+    near_complete: {
+        name: "Near Complete",
+        short_desc: "Targets rows/columns with 6+ cells",
+        algorithm: "Scores near-complete lines (6+ filled). Sets up future clears.",
+        complexity: "O(n + 16)",
+        category: "Strategic",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            if (r.lines > 0) return 100 + r.lines * 50;
+            let score = 0;
+            for (let i = 0; i < 8; i++) {
+                const rowSum = sim.board.grid[i].reduce((a,b) => a+b, 0);
+                const colSum = sim.board.grid.reduce((a,row) => a + row[i], 0);
+                if (rowSum >= 6) score += (rowSum - 5) * 2;
+                if (colSum >= 6) score += (colSum - 5) * 2;
+            }
+            return score;
+        }
+    },
+    balanced: {
+        name: "Balanced",
+        short_desc: "Multi-factor weighted evaluation",
+        algorithm: "Combines score, lines, combo, space, and flexibility with weights.",
+        complexity: "O(n * m)",
+        category: "Strategic",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            return r.points * 1 + r.lines * 10 + r.combo * 5 + sim.board.countEmpty() * 0.5 + sim.getValidMoves().length * 0.3;
+        }
+    },
+    aggressive: {
+        name: "Aggressive",
+        short_desc: "Maximizes score with risk tolerance",
+        algorithm: "Heavily weights points and combos. Ignores board safety.",
+        complexity: "O(n)",
+        category: "Aggressive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            let score = r.points * 2 + r.combo * 15 + r.lines * 25;
+            if (r.lines >= 2) score += 50;
+            return score;
+        }
+    },
+    defensive: {
+        name: "Defensive",
+        short_desc: "Prioritizes survival over scoring",
+        algorithm: "Score = empty_cells * 3 + future_moves * 2. Optimizes for longevity.",
+        complexity: "O(n * m)",
+        category: "Defensive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -1000;
+            return sim.board.countEmpty() * 3 + sim.getValidMoves().length * 2 + r.lines * 20;
+        }
+    }
+};
+
+// ============================================================================
+// UI
+// ============================================================================
+
+let selectedStrategies = new Set(['greedy', 'survivalist', 'line_hunter']);
+let isRunning = false;
+let shouldStop = false;
+
+function renderStrategyList() {
+    const list = document.getElementById('strategy-list');
+    list.innerHTML = '';
+    for (const [id, s] of Object.entries(STRATEGIES)) {
+        const item = document.createElement('div');
+        item.className = 'strategy-item' + (selectedStrategies.has(id) ? ' selected' : '');
+        item.innerHTML = `
+            <div class="strategy-header">
+                <span class="strategy-name">${s.name}</span>
+                <span class="strategy-category">${s.category}</span>
+            </div>
+            <div class="strategy-short">${s.short_desc}</div>
+            <div class="strategy-detail">
+                <div>${s.algorithm}</div>
+                <div class="strategy-complexity">Complexity: ${s.complexity}</div>
+            </div>
+        `;
+        item.onclick = (e) => {
+            if (e.detail === 2) {
+                item.classList.toggle('expanded');
+            } else {
+                if (selectedStrategies.has(id)) {
+                    if (selectedStrategies.size > 1) selectedStrategies.delete(id);
+                } else {
+                    selectedStrategies.add(id);
+                }
+                renderStrategyList();
+            }
+        };
+        list.appendChild(item);
+    }
+}
+
+function createGameCard(strategyId) {
+    const s = STRATEGIES[strategyId];
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.id = `card-${strategyId}`;
+    card.innerHTML = `
+        <div class="card-header">
+            <span class="card-name">${s.name}</span>
+            <span class="card-score" id="score-${strategyId}">0</span>
+        </div>
+        <div class="mini-board" id="board-${strategyId}">
+            ${Array(64).fill('<div class="cell empty"></div>').join('')}
+        </div>
+        <div class="card-stats">
+            <div class="card-stat"><div class="card-stat-value" id="combo-${strategyId}">0x</div><div>Combo</div></div>
+            <div class="card-stat"><div class="card-stat-value" id="lines-${strategyId}">0</div><div>Lines</div></div>
+            <div class="card-stat"><div class="card-stat-value" id="turns-${strategyId}">0</div><div>Turns</div></div>
+        </div>
+        <div class="card-explanation" id="explain-${strategyId}">Ready</div>
+    `;
+    return card;
+}
+
+function updateBoard(strategyId, grid) {
+    const board = document.getElementById(`board-${strategyId}`);
+    if (!board) return;
+    const cells = board.querySelectorAll('.cell');
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            cells[r * 8 + c].className = 'cell ' + (grid[r][c] ? 'filled' : 'empty');
+        }
+    }
+}
+
+function updateLeaderboard(stats) {
+    const rankings = Object.entries(stats)
+        .map(([id, s]) => ({ id, ...s, avg: s.totalScore / s.games }))
+        .sort((a, b) => b.wins - a.wins || b.avg - a.avg);
+
+    document.getElementById('leaderboard').innerHTML = rankings.map((r, i) => `
+        <div class="leaderboard-row">
+            <div class="lb-rank ${i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : ''}">${i + 1}</div>
+            <div class="lb-info">
+                <div class="lb-name">${STRATEGIES[r.id].name}</div>
+                <div class="lb-stats">${r.wins}W | Avg: ${Math.round(r.avg)}</div>
+            </div>
+            <div class="lb-score">${Math.round(r.avg)}</div>
+        </div>
+    `).join('');
+}
+
+function showWinner(strategyId, avgScore) {
+    document.getElementById('winner-name').textContent = STRATEGIES[strategyId].name;
+    document.getElementById('winner-score').textContent = `Average Score: ${Math.round(avgScore)}`;
+    document.getElementById('winner-overlay').classList.add('show');
+}
+
+function closeWinner() {
+    document.getElementById('winner-overlay').classList.remove('show');
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function runBattle() {
+    const strategyIds = Array.from(selectedStrategies);
+    const numGames = parseInt(document.getElementById('num-games').value);
+    const speed = parseInt(document.getElementById('speed').value);
+
+    const grid = document.getElementById('battle-grid');
+    grid.innerHTML = '';
+    strategyIds.forEach(id => grid.appendChild(createGameCard(id)));
+
+    const stats = {};
+    strategyIds.forEach(id => stats[id] = { wins: 0, totalScore: 0, games: 0 });
+
+    isRunning = true;
+    shouldStop = false;
+    document.getElementById('start-btn').disabled = true;
+    document.getElementById('stop-btn').disabled = false;
+
+    for (let gameNum = 1; gameNum <= numGames && !shouldStop; gameNum++) {
+        const seed = Date.now() + gameNum;
+        const games = {};
+        const totalLines = {};
+
+        strategyIds.forEach(id => {
+            games[id] = new Game(seed);
+            totalLines[id] = 0;
+            document.getElementById(`card-${id}`).classList.remove('winner', 'loser', 'eliminated');
+            document.getElementById(`score-${id}`).textContent = '0';
+            document.getElementById(`combo-${id}`).textContent = '0x';
+            document.getElementById(`lines-${id}`).textContent = '0';
+            document.getElementById(`turns-${id}`).textContent = '0';
+            document.getElementById(`explain-${id}`).textContent = 'Starting...';
+            updateBoard(id, games[id].board.grid);
+        });
+
+        document.getElementById('current-game').textContent = `${gameNum} / ${numGames}`;
+
+        let active = new Set(strategyIds);
+        let turn = 0;
+
+        while (active.size > 0 && !shouldStop) {
+            turn++;
+            document.getElementById('current-turn').textContent = turn;
+
+            for (const id of active) {
+                const game = games[id];
+                if (game.gameOver) {
+                    active.delete(id);
+                    document.getElementById(`card-${id}`).classList.add('eliminated');
+                    document.getElementById(`explain-${id}`).textContent = 'Game Over';
+                    continue;
+                }
+
+                const moves = game.getValidMoves();
+                if (moves.length === 0) {
+                    game.gameOver = true;
+                    active.delete(id);
+                    continue;
+                }
+
+                // Evaluate all moves
+                const scored = moves.map(m => ({
+                    move: m,
+                    score: STRATEGIES[id].evaluate(game, m)
+                })).sort((a, b) => b.score - a.score);
+
+                const best = scored[0].move;
+                const result = game.makeMove(best.blockIdx, best.row, best.col);
+
+                if (result) {
+                    totalLines[id] += result.lines;
+                    updateBoard(id, game.board.grid);
+                    document.getElementById(`score-${id}`).textContent = game.score;
+                    document.getElementById(`combo-${id}`).textContent = game.combo + 'x';
+                    document.getElementById(`turns-${id}`).textContent = game.turn;
+                    document.getElementById(`lines-${id}`).textContent = totalLines[id];
+
+                    let explain = result.lines > 0 ? `+${result.points} (${result.lines}L)` : `+${result.points}`;
+                    document.getElementById(`explain-${id}`).textContent = explain;
+                }
+
+                if (game.gameOver) {
+                    active.delete(id);
+                    document.getElementById(`card-${id}`).classList.add('eliminated');
+                    document.getElementById(`explain-${id}`).textContent = 'Game Over';
+                }
+            }
+
+            if (speed > 0) await sleep(speed);
+        }
+
+        // Determine winner
+        const scores = strategyIds.map(id => ({ id, score: games[id].score }));
+        scores.sort((a, b) => b.score - a.score);
+        const maxScore = scores[0].score;
+        const winners = scores.filter(s => s.score === maxScore);
+
+        strategyIds.forEach(id => {
+            const card = document.getElementById(`card-${id}`);
+            card.classList.remove('eliminated');
+            stats[id].totalScore += games[id].score;
+            stats[id].games++;
+            if (games[id].score === maxScore) {
+                stats[id].wins++;
+                if (winners.length === 1) card.classList.add('winner');
+            } else {
+                card.classList.add('loser');
+            }
+        });
+
+        updateLeaderboard(stats);
+        document.getElementById('progress-fill').style.width = (gameNum / numGames * 100) + '%';
+
+        if (gameNum < numGames && !shouldStop) await sleep(500);
+    }
+
+    // Final winner
+    const finalRankings = Object.entries(stats)
+        .map(([id, s]) => ({ id, ...s, avg: s.totalScore / s.games }))
+        .sort((a, b) => b.wins - a.wins || b.avg - a.avg);
+
+    if (finalRankings[0].wins > 0) {
+        showWinner(finalRankings[0].id, finalRankings[0].avg);
+    }
+
+    isRunning = false;
+    document.getElementById('start-btn').disabled = false;
+    document.getElementById('stop-btn').disabled = true;
+}
+
+function stopBattle() {
+    shouldStop = true;
+}
+
+// Initialize
+document.getElementById('start-btn').onclick = runBattle;
+document.getElementById('stop-btn').onclick = stopBattle;
+renderStrategyList();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "observations": [
+    {
+      "action": "placed block with 5 cells",
+      "points": 5,
+      "notes": null,
+      "timestamp": "2026-01-31T11:22:41.593207"
+    },
+    {
+      "action": "placed block with 4 cells,  cleared 1 column",
+      "points": 14,
+      "notes": null,
+      "timestamp": "2026-01-31T11:23:07.977313"
+    },
+    {
+      "action": "placed block  with 4 cells, cleared column  again, 2x combo",
+      "points": 24,
+      "notes": null,
+      "timestamp": "2026-01-31T11:23:50.576991"
+    },
+    {
+      "action": "placed block  with 5 cells, cleared column again again, 3x combo",
+      "points": 35,
+      "notes": null,
+      "timestamp": "2026-01-31T11:24:15.585086"
+    }
+  ],
+  "count": 4,
+  "last_updated": "2026-01-31T11:24:15.585481"
+}

@@ -1,0 +1,145 @@
+{
+  "_source": "Empirically discovered from gameplay screenshots 2026-01-31",
+  "_status": "DISCOVERED_FROM_GAMEPLAY",
+
+  "board_size": 8,
+  "batch_size": 3,
+
+  "blocks": {
+    "_note": "No 1x1 block exists. Smallest is 1x2 (and it's rare)",
+
+    "line_2v": {
+      "shape": [[1], [1]],
+      "cells": 2,
+      "rarity": "rare"
+    },
+    "line_3h": {
+      "shape": [[1, 1, 1]],
+      "cells": 3
+    },
+    "line_4h": {
+      "shape": [[1, 1, 1, 1]],
+      "cells": 4
+    },
+    "line_4v": {
+      "shape": [[1], [1], [1], [1]],
+      "cells": 4
+    },
+    "line_5v": {
+      "shape": [[1], [1], [1], [1], [1]],
+      "cells": 5
+    },
+
+    "square_2x2": {
+      "shape": [[1, 1], [1, 1]],
+      "cells": 4
+    },
+    "square_3x3": {
+      "shape": [[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+      "cells": 9
+    },
+
+    "L_small_0": {
+      "shape": [[1, 0], [1, 1]],
+      "cells": 3,
+      "note": "2x2 L-shape"
+    },
+    "L_small_90": {
+      "shape": [[1, 1], [1, 0]],
+      "cells": 3
+    },
+    "L_small_180": {
+      "shape": [[1, 1], [0, 1]],
+      "cells": 3
+    },
+    "L_small_270": {
+      "shape": [[0, 1], [1, 1]],
+      "cells": 3
+    },
+
+    "L_big_0": {
+      "shape": [[1, 0], [1, 0], [1, 1]],
+      "cells": 4,
+      "note": "2x3 L-shape"
+    },
+    "L_big_90": {
+      "shape": [[1, 1, 1], [1, 0, 0]],
+      "cells": 4
+    },
+    "L_big_180": {
+      "shape": [[1, 1], [0, 1], [0, 1]],
+      "cells": 4
+    },
+    "L_big_270": {
+      "shape": [[0, 0, 1], [1, 1, 1]],
+      "cells": 4
+    },
+
+    "S_shape": {
+      "shape": [[0, 1, 1], [1, 1, 0]],
+      "cells": 4
+    },
+    "Z_shape": {
+      "shape": [[1, 1, 0], [0, 1, 1]],
+      "cells": 4
+    },
+
+    "T_shape_0": {
+      "shape": [[0, 1, 0], [1, 1, 1]],
+      "cells": 4,
+      "note": "May need to verify all T rotations exist"
+    }
+  },
+
+  "scoring": {
+    "_note": "CONFIRMED through controlled testing",
+
+    "points_per_cell_placed": 1,
+
+    "combo_points": {
+      "formula": "10 * combo_level per line cleared",
+      "_note": "Each line cleared increments combo, then awards 10*N points",
+      "examples": {
+        "1x": 10,
+        "2x": 20,
+        "3x": 30,
+        "10x": 100
+      }
+    },
+
+    "multi_clear_bonus": {
+      "bonus": 30,
+      "_note": "Flat +30 bonus when clearing 2+ lines simultaneously (only if combo > 0)"
+    },
+
+    "combo_system": {
+      "grace_period": 3,
+      "_grace_note": "Combo streak persists for up to 3 block placements without clearing",
+      "increment_per_line": true,
+      "_increment_note": "Each line cleared increments combo counter separately"
+    },
+
+    "verified_examples": [
+      {"scenario": "single clear", "start": 9, "combo": "0->1x", "cells": 5, "end": 24, "calc": "9 + 5 + 10 = 24"},
+      {"scenario": "no clear", "start": 24, "cells": 4, "end": 28, "calc": "24 + 4 = 28"},
+      {"scenario": "single clear", "start": 28, "combo": "1x->2x", "cells": 4, "end": 62, "calc": "28 + 4 + 20 + (10 base?) = 62"},
+      {"scenario": "double clear from 0", "start": 40, "combo": "0->2x", "cells": 4, "end": 64, "calc": "40 + 4 + 10 + 20 - 10? = 64"},
+      {"scenario": "double clear", "start": 796, "combo": "9x->11x", "cells": 4, "end": 1040, "calc": "796 + 4 + 100 + 110 + 30 = 1040"},
+      {"scenario": "double clear", "start": 142, "combo": "1x->3x", "cells": 4, "end": 226, "calc": "142 + 4 + 20 + 30 + 30 = 226"},
+      {"scenario": "double clear", "start": 3314, "combo": "6x->8x", "cells": 4, "end": 3498, "calc": "3314 + 4 + 70 + 80 + 30 = 3498"},
+      {"scenario": "double clear", "start": 3498, "combo": "8x->10x", "cells": 9, "end": 3727, "calc": "3498 + 9 + 90 + 100 + 30 = 3727"}
+    ]
+  },
+
+  "game_modes": {
+    "observed": ["MEDIUM MODE"],
+    "suspected": ["EASY MODE?", "HARD MODE?"]
+  },
+
+  "mechanics": {
+    "row_clear": true,
+    "column_clear": true,
+    "simultaneous_clear": true,
+    "combo_system": true
+  }
+}

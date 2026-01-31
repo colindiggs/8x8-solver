@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8x8 Block Puzzle Trainer</title>
+    <style>
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-panel: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --text: #eee;
+            --text-dim: #888;
+            --cell-empty: #2a2a4a;
+            --cell-filled: #4ecdc4;
+            --cell-cleared: #ffff00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-light);
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-dim);
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background: var(--bg-dark);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-dim);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-dark);
+            color: var(--text);
+            margin-top: 10px;
+        }
+
+        /* Game Board */
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-light);
+        }
+
+        .game-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            color: var(--text-dim);
+        }
+
+        .game-info span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .game-info .value {
+            color: var(--text);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 2px;
+            background: #111;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .cell {
+            border-radius: 4px;
+            transition: all 0.15s;
+        }
+
+        .cell.empty {
+            background: var(--cell-empty);
+        }
+
+        .cell.filled {
+            background: var(--cell-filled);
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+        }
+
+        .cell.cleared {
+            background: var(--cell-cleared);
+            animation: flash 0.3s ease-out;
+        }
+
+        @keyframes flash {
+            0% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Block Preview */
+        .blocks-preview {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .block-preview {
+            display: grid;
+            gap: 2px;
+            padding: 8px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            opacity: 0.4;
+        }
+
+        .block-preview.available {
+            opacity: 1;
+        }
+
+        .block-preview .cell {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Stats */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .stat-value.highlight {
+            color: var(--accent-light);
+        }
+
+        /* Chart area */
+        .chart-area {
+            margin-top: 20px;
+            height: 150px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            padding: 10px;
+            position: relative;
+        }
+
+        #score-chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Log */
+        .log-area {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .log-entry.score {
+            color: var(--accent-light);
+        }
+
+        .log-entry.combo {
+            color: #4ecdc4;
+        }
+
+        /* Status indicator */
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-dim);
+        }
+
+        .status-dot.connected {
+            background: #4ecdc4;
+        }
+
+        .status-dot.training {
+            background: var(--accent);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Progress */
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-dark);
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel - Controls -->
+        <div class="panel">
+            <h1>8x8 Puzzle Trainer</h1>
+
+            <div class="status">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Disconnected</span>
+            </div>
+
+            <div class="control-group">
+                <label for="agent-select">Agent Type</label>
+                <select id="agent-select">
+                    <option value="heuristic">Heuristic Agent</option>
+                    <option value="random">Random Agent</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="num-games">Number of Games</label>
+                <input type="number" id="num-games" value="10" min="1" max="1000">
+            </div>
+
+            <div class="control-group">
+                <label for="speed">Speed (seconds per move)</label>
+                <select id="speed">
+                    <option value="0.5">Slow (0.5s)</option>
+                    <option value="0.1" selected>Normal (0.1s)</option>
+                    <option value="0.02">Fast (0.02s)</option>
+                    <option value="0">Instant</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" id="start-btn">Start Training</button>
+            <button class="btn-secondary" id="stop-btn" disabled>Stop</button>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <h2 style="margin-top: 30px;">Current Game</h2>
+            <div class="stat-row">
+                <span class="stat-label">Game #</span>
+                <span class="stat-value" id="current-game">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Turn</span>
+                <span class="stat-value" id="current-turn">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Combo</span>
+                <span class="stat-value highlight" id="current-combo">-</span>
+            </div>
+        </div>
+
+        <!-- Center - Game Board -->
+        <div class="panel game-area">
+            <div class="score-display" id="score-display">0</div>
+            <div class="game-info">
+                <span>Lines: <span class="value" id="lines-cleared">0</span></span>
+                <span>Max Combo: <span class="value" id="max-combo">0</span></span>
+            </div>
+
+            <div id="board"></div>
+
+            <div class="blocks-preview" id="blocks-preview"></div>
+        </div>
+
+        <!-- Right Panel - Stats -->
+        <div class="panel">
+            <h2>Training Stats</h2>
+
+            <div class="stat-row">
+                <span class="stat-label">Games Completed</span>
+                <span class="stat-value" id="games-completed">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Average Score</span>
+                <span class="stat-value highlight" id="avg-score">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Best Score</span>
+                <span class="stat-value" id="max-score">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Worst Score</span>
+                <span class="stat-value" id="min-score">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Avg Turns</span>
+                <span class="stat-value" id="avg-turns">-</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Avg Max Combo</span>
+                <span class="stat-value" id="avg-combo">-</span>
+            </div>
+
+            <div class="chart-area">
+                <canvas id="score-chart"></canvas>
+            </div>
+
+            <h2 style="margin-top: 20px;">Activity Log</h2>
+            <div class="log-area" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let ws = null;
+        let isTraining = false;
+        let scoreHistory = [];
+        let currentMaxCombo = 0;
+        let totalLinesCleared = 0;
+
+        // DOM elements
+        const board = document.getElementById('board');
+        const blocksPreview = document.getElementById('blocks-preview');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const log = document.getElementById('log');
+        const progressFill = document.getElementById('progress-fill');
+
+        // Initialize board
+        function initBoard() {
+            board.innerHTML = '';
+            for (let i = 0; i < 64; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell empty';
+                cell.dataset.idx = i;
+                board.appendChild(cell);
+            }
+        }
+
+        // Update board from grid state
+        function updateBoard(grid) {
+            const cells = board.querySelectorAll('.cell');
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const idx = row * 8 + col;
+                    const cell = cells[idx];
+                    if (grid[row][col] === 1) {
+                        cell.className = 'cell filled';
+                    } else {
+                        cell.className = 'cell empty';
+                    }
+                }
+            }
+        }
+
+        // Render block previews
+        function renderBlocks(blocks, blockNames) {
+            blocksPreview.innerHTML = '';
+            blocks.forEach((shape, idx) => {
+                const preview = document.createElement('div');
+                preview.className = 'block-preview';
+                if (shape) {
+                    preview.classList.add('available');
+                    preview.style.gridTemplateColumns = `repeat(${shape[0].length}, 20px)`;
+
+                    for (let row of shape) {
+                        for (let cell of row) {
+                            const cellDiv = document.createElement('div');
+                            cellDiv.className = cell === 1 ? 'cell filled' : 'cell empty';
+                            preview.appendChild(cellDiv);
+                        }
+                    }
+                } else {
+                    preview.innerHTML = '<div class="cell empty" style="width:40px;height:40px;"></div>';
+                }
+                blocksPreview.appendChild(preview);
+            });
+        }
+
+        // Add log entry
+        function addLog(message, type = '') {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            entry.textContent = message;
+            log.insertBefore(entry, log.firstChild);
+
+            // Keep log manageable
+            while (log.children.length > 100) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Update stats display
+        function updateStats(stats) {
+            document.getElementById('games-completed').textContent = stats.games_completed || 0;
+            document.getElementById('avg-score').textContent = stats.running_avg ? stats.running_avg.toFixed(1) : '-';
+            document.getElementById('max-score').textContent = stats.max_score || '-';
+            document.getElementById('min-score').textContent = stats.min_score || '-';
+            document.getElementById('avg-turns').textContent = stats.avg_turns ? stats.avg_turns.toFixed(1) : '-';
+            document.getElementById('avg-combo').textContent = stats.avg_combo ? stats.avg_combo.toFixed(1) : '-';
+
+            const numGames = parseInt(document.getElementById('num-games').value);
+            const progress = (stats.games_completed / numGames) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        // Draw simple score chart
+        function drawChart() {
+            const canvas = document.getElementById('score-chart');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.parentElement.clientWidth - 20;
+            const height = canvas.parentElement.clientHeight - 20;
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, width, height);
+
+            if (scoreHistory.length < 2) return;
+
+            const maxScore = Math.max(...scoreHistory) * 1.1;
+            const minScore = 0;
+
+            ctx.strokeStyle = '#e94560';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            scoreHistory.forEach((score, i) => {
+                const x = (i / (scoreHistory.length - 1)) * width;
+                const y = height - ((score - minScore) / (maxScore - minScore)) * height;
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.stroke();
+
+            // Draw avg line
+            const avg = scoreHistory.reduce((a, b) => a + b, 0) / scoreHistory.length;
+            const avgY = height - ((avg - minScore) / (maxScore - minScore)) * height;
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, avgY);
+            ctx.lineTo(width, avgY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Connect WebSocket
+        function connect() {
+            ws = new WebSocket(`ws://${window.location.host}/ws/train`);
+
+            ws.onopen = () => {
+                statusDot.className = 'status-dot connected';
+                statusText.textContent = 'Connected';
+                startBtn.disabled = false;
+            };
+
+            ws.onclose = () => {
+                statusDot.className = 'status-dot';
+                statusText.textContent = 'Disconnected';
+                startBtn.disabled = true;
+                isTraining = false;
+                updateUI();
+            };
+
+            ws.onerror = (err) => {
+                addLog('WebSocket error', 'error');
+                console.error(err);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            };
+        }
+
+        // Handle incoming messages
+        function handleMessage(data) {
+            switch (data.type) {
+                case 'training_start':
+                    addLog(`Training started: ${data.config.agent_type} agent, ${data.config.num_games} games`);
+                    scoreHistory = [];
+                    break;
+
+                case 'game_start':
+                    document.getElementById('current-game').textContent = data.game_id + 1;
+                    currentMaxCombo = 0;
+                    totalLinesCleared = 0;
+                    updateBoard(data.state.grid);
+                    renderBlocks(data.state.current_blocks, data.state.block_names);
+                    document.getElementById('score-display').textContent = data.state.score;
+                    document.getElementById('current-turn').textContent = data.state.turn_count;
+                    document.getElementById('current-combo').textContent = data.state.combo_streak + 'x';
+                    document.getElementById('lines-cleared').textContent = 0;
+                    document.getElementById('max-combo').textContent = 0;
+                    break;
+
+                case 'move':
+                    updateBoard(data.state.grid);
+                    renderBlocks(data.state.current_blocks, data.state.block_names);
+                    document.getElementById('score-display').textContent = data.state.score;
+                    document.getElementById('current-turn').textContent = data.state.turn_count;
+
+                    const combo = data.result.combo;
+                    document.getElementById('current-combo').textContent = combo + 'x';
+                    if (combo > currentMaxCombo) {
+                        currentMaxCombo = combo;
+                        document.getElementById('max-combo').textContent = currentMaxCombo;
+                    }
+
+                    if (data.result.lines_cleared > 0) {
+                        totalLinesCleared += data.result.lines_cleared;
+                        document.getElementById('lines-cleared').textContent = totalLinesCleared;
+                        addLog(`+${data.result.score} (${data.result.lines_cleared} lines, ${combo}x combo)`, 'combo');
+                    }
+                    break;
+
+                case 'game_end':
+                    scoreHistory.push(data.metrics.final_score);
+                    addLog(`Game ${data.metrics.game_id + 1}: Score ${data.metrics.final_score}, ${data.metrics.turns} turns, max combo ${data.metrics.max_combo}x`, 'score');
+                    drawChart();
+                    break;
+
+                case 'stats_update':
+                    updateStats(data);
+                    break;
+
+                case 'training_complete':
+                    addLog(`Training complete! Avg: ${data.final_avg.toFixed(1)}, Best: ${data.max_score}`);
+                    isTraining = false;
+                    updateUI();
+                    break;
+
+                case 'error':
+                    addLog(`Error: ${data.message}`, 'error');
+                    isTraining = false;
+                    updateUI();
+                    break;
+            }
+        }
+
+        // Start training
+        function startTraining() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                connect();
+                setTimeout(startTraining, 500);
+                return;
+            }
+
+            const config = {
+                agent_type: document.getElementById('agent-select').value,
+                num_games: parseInt(document.getElementById('num-games').value),
+                speed: parseFloat(document.getElementById('speed').value)
+            };
+
+            ws.send(JSON.stringify({ config }));
+            isTraining = true;
+            updateUI();
+            statusDot.className = 'status-dot training';
+            statusText.textContent = 'Training...';
+        }
+
+        // Stop training
+        function stopTraining() {
+            if (ws) {
+                ws.close();
+            }
+            isTraining = false;
+            updateUI();
+        }
+
+        // Update UI state
+        function updateUI() {
+            startBtn.disabled = isTraining;
+            stopBtn.disabled = !isTraining;
+            document.getElementById('agent-select').disabled = isTraining;
+            document.getElementById('num-games').disabled = isTraining;
+            document.getElementById('speed').disabled = isTraining;
+
+            if (!isTraining) {
+                statusDot.className = ws && ws.readyState === WebSocket.OPEN ? 'status-dot connected' : 'status-dot';
+                statusText.textContent = ws && ws.readyState === WebSocket.OPEN ? 'Connected' : 'Disconnected';
+            }
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', startTraining);
+        stopBtn.addEventListener('click', stopTraining);
+
+        // Initialize
+        initBoard();
+        connect();
+    </script>
+</body>
+</html>
