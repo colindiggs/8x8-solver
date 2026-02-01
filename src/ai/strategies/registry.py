@@ -6,47 +6,31 @@ from typing import Dict, List, Optional, Type
 from .base import Strategy, StrategyInfo
 from .simple_strategies import (
     RandomStrategy,
-    GreedyScoreStrategy,
-    EdgeHuggerStrategy,
-    CenterControlStrategy,
-    LineHunterStrategy,
     ComboChaserStrategy,
     SurvivalistStrategy,
-    CompactorStrategy,
-    NearCompleteStrategy,
 )
 from .advanced_strategies import (
     BalancedStrategy,
-    LookaheadStrategy,
-    MonteCarloStrategy,
-    HolesAvoiderStrategy,
-    RowColumnBalanceStrategy,
-    AggressiveStrategy,
     DefensiveStrategy,
+)
+from .evolved_strategies import (
+    DeepLookaheadStrategy,
+    ComboMasterStrategy,
+    TunedBalancedStrategy,
+    SurvivalExpertStrategy,
 )
 
 
-# Registry of all available strategies
+# Registry of all available strategies (curated set of ~5 distinct approaches)
 STRATEGIES: Dict[str, Type[Strategy]] = {
-    # Simple strategies
+    # Baseline
     'random': RandomStrategy,
-    'greedy': GreedyScoreStrategy,
-    'edge_hugger': EdgeHuggerStrategy,
-    'center': CenterControlStrategy,
-    'line_hunter': LineHunterStrategy,
-    'combo_chaser': ComboChaserStrategy,
-    'survivalist': SurvivalistStrategy,
-    'compactor': CompactorStrategy,
-    'near_complete': NearCompleteStrategy,
 
-    # Advanced strategies
-    'balanced': BalancedStrategy,
-    'lookahead': LookaheadStrategy,
-    'monte_carlo': MonteCarloStrategy,
-    'holes_avoider': HolesAvoiderStrategy,
-    'balance_rc': RowColumnBalanceStrategy,
-    'aggressive': AggressiveStrategy,
-    'defensive': DefensiveStrategy,
+    # Core strategies (distinct approaches)
+    'tuned_balanced': TunedBalancedStrategy,    # Multi-factor balanced
+    'survival_expert': SurvivalExpertStrategy,  # Defensive/longevity
+    'combo_master': ComboMasterStrategy,        # Aggressive combo focus
+    'deep_lookahead': DeepLookaheadStrategy,    # Search-based
 }
 
 

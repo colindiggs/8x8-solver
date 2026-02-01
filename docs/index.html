@@ -40,7 +40,7 @@
         .subtitle { color: var(--text-dim); font-size: 0.8rem; }
         .container {
             display: grid;
-            grid-template-columns: 280px 1fr 220px;
+            grid-template-columns: 280px 1fr 260px;
             height: calc(100vh - 50px);
         }
         .sidebar {
@@ -96,12 +96,12 @@
         .mode-info { flex: 1; }
         .mode-name { font-weight: 600; margin-bottom: 2px; }
         .mode-desc { font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
-        .strategy-list { max-height: 280px; overflow-y: auto; }
+        .strategy-list { max-height: 320px; overflow-y: auto; }
         .strategy-item {
-            padding: 8px 10px;
-            margin-bottom: 4px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
             background: var(--bg-card);
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             border: 1px solid transparent;
             transition: all 0.15s;
@@ -109,21 +109,21 @@
         .strategy-item:hover { border-color: var(--text-muted); }
         .strategy-item.selected { border-color: var(--accent-green); background: rgba(78,205,196,0.1); }
         .strategy-header { display: flex; justify-content: space-between; align-items: center; }
-        .strategy-name { font-weight: 500; font-size: 0.85rem; }
+        .strategy-name { font-weight: 600; font-size: 0.9rem; }
         .strategy-category {
             font-size: 0.65rem;
-            padding: 2px 5px;
+            padding: 2px 6px;
             background: rgba(255,255,255,0.08);
             border-radius: 3px;
             color: var(--text-dim);
         }
-        .strategy-short { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; }
+        .strategy-short { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
         .strategy-detail {
             display: none;
-            margin-top: 8px;
-            padding-top: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
             border-top: 1px solid var(--border);
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: var(--text-dim);
             line-height: 1.5;
         }
@@ -165,20 +165,20 @@
         .progress-bar { height: 3px; background: var(--bg-card); border-radius: 2px; margin-top: 12px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
         main { padding: 16px; overflow-y: auto; background: var(--bg-dark); }
-        .battle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+        .battle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
         .game-card {
             background: var(--bg-panel);
             border-radius: 8px;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid transparent;
             transition: all 0.2s;
         }
         .game-card.winner { border-color: var(--accent-gold); }
         .game-card.loser { opacity: 0.5; }
         .game-card.eliminated { border-color: var(--accent); background: rgba(233,69,96,0.1); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .card-name { font-weight: 600; font-size: 0.9rem; }
-        .card-score { font-size: 1.4rem; font-weight: 700; color: var(--accent-light); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-name { font-weight: 600; font-size: 0.95rem; }
+        .card-score { font-size: 1.5rem; font-weight: 700; color: var(--accent-light); }
         .mini-board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -191,42 +191,47 @@
         .mini-board .cell { border-radius: 1px; transition: background 0.1s; }
         .mini-board .cell.empty { background: var(--cell-empty); }
         .mini-board .cell.filled { background: var(--cell-filled); }
-        .card-stats { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7rem; color: var(--text-dim); }
+        .card-stats { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.72rem; color: var(--text-dim); }
         .card-stat { text-align: center; }
-        .card-stat-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+        .card-stat-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
         .card-explanation {
-            margin-top: 8px;
-            padding: 6px 8px;
+            margin-top: 10px;
+            padding: 8px 10px;
             background: var(--bg-card);
             border-radius: 4px;
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             color: var(--accent-green);
             font-family: monospace;
-            min-height: 28px;
+            min-height: 30px;
         }
         .right-panel { background: var(--bg-panel); padding: 16px; border-left: 1px solid var(--border); overflow-y: auto; }
-        .leaderboard-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
-        .leaderboard-row { display: flex; align-items: center; gap: 8px; padding: 8px; margin-bottom: 4px; background: var(--bg-card); border-radius: 4px; }
-        .lb-rank { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.7rem; font-weight: 700; background: var(--text-muted); color: var(--bg-dark); }
-        .lb-rank.r1 { background: var(--accent-gold); }
-        .lb-rank.r2 { background: #c0c0c0; }
-        .lb-rank.r3 { background: #cd7f32; }
-        .lb-info { flex: 1; min-width: 0; }
-        .lb-name { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lb-stats { font-size: 0.65rem; color: var(--text-dim); }
-        .lb-score { font-weight: 700; color: var(--accent-light); font-size: 0.85rem; }
+        .panel-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; }
         .game-info-panel { background: var(--bg-card); border-radius: 6px; padding: 12px; margin-bottom: 16px; }
         .game-info-row { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 4px 0; }
         .game-info-label { color: var(--text-dim); }
         .game-info-value { font-weight: 600; }
-        .winner-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .leaderboard-row { display: flex; align-items: center; gap: 8px; padding: 10px; margin-bottom: 6px; background: var(--bg-card); border-radius: 6px; }
+        .lb-rank { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.72rem; font-weight: 700; background: var(--text-muted); color: var(--bg-dark); }
+        .lb-rank.r1 { background: var(--accent-gold); }
+        .lb-rank.r2 { background: #c0c0c0; }
+        .lb-rank.r3 { background: #cd7f32; }
+        .lb-info { flex: 1; min-width: 0; }
+        .lb-name { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lb-stats { font-size: 0.68rem; color: var(--text-dim); }
+        .lb-score { font-weight: 700; color: var(--accent-light); font-size: 0.88rem; }
+        .stats-chart { background: var(--bg-card); border-radius: 6px; padding: 12px; margin-top: 16px; }
+        .chart-canvas { width: 100%; height: 120px; }
+        .winner-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .winner-overlay.show { display: flex; }
-        .winner-card { background: var(--bg-panel); border: 2px solid var(--accent-gold); border-radius: 12px; padding: 32px 48px; text-align: center; animation: popIn 0.3s ease-out; }
+        .winner-card { background: var(--bg-panel); border: 2px solid var(--accent-gold); border-radius: 12px; padding: 36px 56px; text-align: center; animation: popIn 0.3s ease-out; max-width: 500px; }
         @keyframes popIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .winner-label { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
-        .winner-name { font-size: 1.8rem; font-weight: 700; color: var(--accent-gold); margin: 8px 0; }
-        .winner-score { font-size: 1rem; color: var(--text-dim); }
-        .winner-close { margin-top: 20px; padding: 8px 24px; background: var(--accent-gold); color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .winner-name { font-size: 2rem; font-weight: 700; color: var(--accent-gold); margin: 10px 0; }
+        .winner-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; text-align: center; }
+        .winner-stat-value { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+        .winner-stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+        .winner-chart { margin: 20px 0; padding: 12px; background: var(--bg-card); border-radius: 8px; }
+        .winner-close { margin-top: 20px; padding: 10px 28px; background: var(--accent-gold); color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
         @media (max-width: 900px) {
             .container { grid-template-columns: 1fr; }
             .sidebar, .right-panel { display: none; }
@@ -250,13 +255,13 @@
                         <div class="mode-radio"></div>
                         <div class="mode-info">
                             <div class="mode-name">Battle Royale</div>
-                            <div class="mode-desc">All strategies play the same game simultaneously with identical block sequences.</div>
+                            <div class="mode-desc">All strategies play the same game simultaneously with identical block sequences. Same RNG seed ensures fair comparison.</div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="section">
-                <div class="section-header">Strategies (click to select)</div>
+                <div class="section-header">Strategies (click to select, double-click for details)</div>
                 <div class="strategy-list" id="strategy-list"></div>
             </div>
             <div class="section">
@@ -264,14 +269,14 @@
                 <div class="control-row">
                     <div class="control-group">
                         <label>Games</label>
-                        <input type="number" id="num-games" value="3" min="1" max="20">
+                        <input type="number" id="num-games" value="5" min="1" max="50">
                     </div>
                     <div class="control-group">
                         <label>Speed</label>
                         <select id="speed">
-                            <option value="200">Slow</option>
-                            <option value="50" selected>Normal</option>
-                            <option value="10">Fast</option>
+                            <option value="150">Slow</option>
+                            <option value="40" selected>Normal</option>
+                            <option value="8">Fast</option>
                             <option value="0">Instant</option>
                         </select>
                     </div>
@@ -287,20 +292,31 @@
             </div>
         </main>
         <aside class="right-panel">
-            <div class="leaderboard-title">Current Game</div>
+            <div class="panel-title">Current Game</div>
             <div class="game-info-panel">
                 <div class="game-info-row"><span class="game-info-label">Game</span><span class="game-info-value" id="current-game">-</span></div>
                 <div class="game-info-row"><span class="game-info-label">Turn</span><span class="game-info-value" id="current-turn">-</span></div>
             </div>
-            <div class="leaderboard-title">Leaderboard</div>
+            <div class="panel-title">Leaderboard</div>
             <div id="leaderboard"></div>
+            <div class="stats-chart">
+                <div class="panel-title">Score History</div>
+                <canvas id="score-chart" class="chart-canvas"></canvas>
+            </div>
         </aside>
     </div>
     <div class="winner-overlay" id="winner-overlay">
         <div class="winner-card">
-            <div class="winner-label">Winner</div>
+            <div class="winner-label">Champion</div>
             <div class="winner-name" id="winner-name"></div>
-            <div class="winner-score" id="winner-score"></div>
+            <div class="winner-stats">
+                <div><div class="winner-stat-value" id="winner-wins">0</div><div class="winner-stat-label">Wins</div></div>
+                <div><div class="winner-stat-value" id="winner-avg">0</div><div class="winner-stat-label">Avg Score</div></div>
+                <div><div class="winner-stat-value" id="winner-high">0</div><div class="winner-stat-label">High Score</div></div>
+            </div>
+            <div class="winner-chart">
+                <canvas id="winner-chart" width="380" height="100"></canvas>
+            </div>
             <button class="winner-close" onclick="closeWinner()">Continue</button>
         </div>
     </div>
@@ -401,6 +417,30 @@ class Board {
     countEmpty() {
         return this.grid.flat().filter(c => c === 0).length;
     }
+    countHoles() {
+        let holes = 0;
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                if (!this.grid[r][c]) {
+                    let blocked = 0;
+                    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc]) => {
+                        const nr = r+dr, nc = c+dc;
+                        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || this.grid[nr]?.[nc]) blocked++;
+                    });
+                    if (blocked >= 3) holes++;
+                }
+            }
+        }
+        return holes;
+    }
+    countNearComplete() {
+        let count = 0;
+        for (let i = 0; i < 8; i++) {
+            if (this.grid[i].reduce((a,b) => a+b, 0) >= 6) count++;
+            if (this.grid.reduce((a,row) => a + row[i], 0) >= 6) count++;
+        }
+        return count;
+    }
 }
 
 class Game {
@@ -455,7 +495,6 @@ class Game {
 
         let points = cells;
         const isMulti = lines >= 2;
-        const prevCombo = this.combo;
 
         if (lines > 0) {
             for (let i = 0; i < lines; i++) {
@@ -492,241 +531,125 @@ class Game {
 }
 
 // ============================================================================
-// STRATEGIES (Ported from Python)
+// STRATEGIES (Curated set of distinct approaches)
 // ============================================================================
 
 const STRATEGIES = {
     random: {
         name: "Random",
         short_desc: "Uniformly random move selection",
-        algorithm: "Selects a valid move uniformly at random. Baseline for comparison.",
+        algorithm: "Selects a valid move uniformly at random. Serves as baseline for comparison. Expected score reflects pure chance without optimization.",
         complexity: "O(n)",
         category: "Baseline",
         evaluate: (game, move) => Math.random()
     },
-    greedy: {
-        name: "Greedy",
-        short_desc: "Maximizes immediate points per move",
-        algorithm: "Simulates each move and picks the one with highest immediate score gain.",
-        complexity: "O(n)",
-        category: "Greedy",
+    tuned_balanced: {
+        name: "Tuned Balanced",
+        short_desc: "Multi-factor weighted evaluation",
+        algorithm: "Weighted combination of 6 factors tuned through experimentation: immediate_score (1.0), lines_cleared (15.0), combo_bonus (8.0), empty_cells (0.4), future_moves (0.5), holes_penalty (-8.0). Balances short-term scoring with long-term survival.",
+        complexity: "O(n * m)",
+        category: "Strategic",
         evaluate: (game, move) => {
             const sim = game.copy();
             const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            return r ? r.points : -1000;
+            if (!r) return -10000;
+            const holes = sim.board.countHoles();
+            return r.points * 1 + r.lines * 15 + r.combo * 8 +
+                   sim.board.countEmpty() * 0.4 + sim.getValidMoves().length * 0.5 - holes * 8;
         }
     },
-    line_hunter: {
-        name: "Line Hunter",
-        short_desc: "Maximizes line clears per move",
-        algorithm: "Prioritizes moves that clear lines. Non-clearing moves score 0.",
-        complexity: "O(n)",
+    survival_expert: {
+        name: "Survival Expert",
+        short_desc: "Maximizes longevity and flexibility",
+        algorithm: "Primary goal: avoid game over. Evaluates: future_move_count * 3 + empty_cells * 2 + lines_cleared * 25 - holes * 10. Heavily penalizes moves that reduce options below threshold. Clears lines only when safe.",
+        complexity: "O(n * m)",
+        category: "Defensive",
+        evaluate: (game, move) => {
+            const sim = game.copy();
+            const r = sim.makeMove(move.blockIdx, move.row, move.col);
+            if (!r) return -10000;
+            const futureCount = sim.getValidMoves().length;
+            const empty = sim.board.countEmpty();
+            const holes = sim.board.countHoles();
+            let score = futureCount * 3 + empty * 2 + r.lines * 25 - holes * 10;
+            if (futureCount < 10) score -= (10 - futureCount) * 5;
+            if (futureCount === 0) score -= 500;
+            return score;
+        }
+    },
+    combo_master: {
+        name: "Combo Master",
+        short_desc: "Combo-focused with setup awareness",
+        algorithm: "Prioritizes building and maintaining combos. Evaluates: combo_level * 25 + lines_cleared * 40 + near_complete_bonus. Looks ahead to find moves that set up future clears. Penalizes moves that waste combo grace period.",
+        complexity: "O(n * eval)",
         category: "Aggressive",
         evaluate: (game, move) => {
             const sim = game.copy();
             const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            return r ? r.lines * 100 : -1000;
-        }
-    },
-    combo_chaser: {
-        name: "Combo Chaser",
-        short_desc: "Optimizes for combo streak maintenance",
-        algorithm: "Heavily weights moves that continue combo streaks. Penalizes combo breaks.",
-        complexity: "O(n)",
-        category: "Aggressive",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
+            if (!r) return -10000;
             let score = 0;
             if (r.lines > 0) {
-                score += r.combo * 20;
-                if (r.lines >= 2) score += 50;
-            } else if (game.combo > 0 && game.movesSinceClear >= 2) {
-                score -= 30;
+                score += r.combo * 25 + r.lines * 40;
+                if (r.lines >= 2) score += 60;
             }
+            score += sim.board.countNearComplete() * 15;
+            if (r.lines === 0 && game.combo > 0 && game.movesSinceClear >= 2) {
+                score -= 20;
+                if (sim.board.countNearComplete() > 0) score += 10;
+            }
+            score += sim.board.countEmpty() * 0.2;
             return score;
         }
     },
-    survivalist: {
-        name: "Survivalist",
-        short_desc: "Maximizes board flexibility and survival",
-        algorithm: "Score = empty_cells * 2 + future_moves. Optimizes for game length.",
-        complexity: "O(n * m)",
-        category: "Defensive",
+    deep_lookahead: {
+        name: "Deep Lookahead",
+        short_desc: "2-ply search with board evaluation",
+        algorithm: "Minimax-style 2-ply search. For each move, simulates the result then evaluates all follow-up moves (best 15 sampled). Uses composite evaluation: score_gain + 0.4*best_future + 0.3*empty_cells - 5*holes. Prunes losing branches early.",
+        complexity: "O(n * 15 * eval)",
+        category: "Search-Based",
         evaluate: (game, move) => {
             const sim = game.copy();
             const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            return sim.board.countEmpty() * 2 + sim.getValidMoves().length;
-        }
-    },
-    edge_hugger: {
-        name: "Edge Hugger",
-        short_desc: "Prioritizes edge and corner placement",
-        algorithm: "Scores cells touching board perimeter. Corners=3, Edges=2.",
-        complexity: "O(n)",
-        category: "Positional",
-        evaluate: (game, move) => {
-            let score = 0;
-            for (let dr = 0; dr < move.shape.length; dr++) {
-                for (let dc = 0; dc < move.shape[0].length; dc++) {
-                    if (move.shape[dr][dc]) {
-                        const r = move.row + dr, c = move.col + dc;
-                        const isCorner = (r === 0 || r === 7) && (c === 0 || c === 7);
-                        const isEdge = r === 0 || r === 7 || c === 0 || c === 7;
-                        if (isCorner) score += 3;
-                        else if (isEdge) score += 2;
-                    }
+            if (!r) return -10000;
+
+            const immediate = r.points;
+            const empty = sim.board.countEmpty();
+            const holes = sim.board.countHoles();
+
+            const futureMoves = sim.getValidMoves();
+            if (futureMoves.length === 0) {
+                return immediate - 1000 + empty * 0.3;
+            }
+
+            let bestFuture = 0;
+            for (let i = 0; i < Math.min(15, futureMoves.length); i++) {
+                const fm = futureMoves[i];
+                const sim2 = sim.copy();
+                const r2 = sim2.makeMove(fm.blockIdx, fm.row, fm.col);
+                if (r2) {
+                    const futureScore = r2.points + sim2.board.countEmpty() * 0.2 - sim2.board.countHoles() * 3;
+                    bestFuture = Math.max(bestFuture, futureScore);
                 }
             }
-            const sim = game.copy();
-            const res = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (res && res.lines > 0) score += res.lines * 5;
-            return score;
-        }
-    },
-    center: {
-        name: "Center Control",
-        short_desc: "Minimizes distance from board center",
-        algorithm: "Calculates Manhattan distance from cells to center (3.5, 3.5).",
-        complexity: "O(n)",
-        category: "Positional",
-        evaluate: (game, move) => {
-            let totalDist = 0, cells = 0;
-            for (let dr = 0; dr < move.shape.length; dr++) {
-                for (let dc = 0; dc < move.shape[0].length; dc++) {
-                    if (move.shape[dr][dc]) {
-                        const r = move.row + dr, c = move.col + dc;
-                        totalDist += Math.abs(r - 3.5) + Math.abs(c - 3.5);
-                        cells++;
-                    }
-                }
-            }
-            return 7 - (totalDist / cells);
-        }
-    },
-    compactor: {
-        name: "Compactor",
-        short_desc: "Maximizes cell adjacency/clustering",
-        algorithm: "Counts orthogonal adjacencies between filled cells.",
-        complexity: "O(n + 64)",
-        category: "Positional",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            let adj = 0;
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    if (sim.board.grid[row][col]) {
-                        [[0,1],[1,0]].forEach(([dr,dc]) => {
-                            const nr = row+dr, nc = col+dc;
-                            if (nr < 8 && nc < 8 && sim.board.grid[nr][nc]) adj++;
-                        });
-                    }
-                }
-            }
-            return adj + (r.lines * 20);
-        }
-    },
-    holes_avoider: {
-        name: "Holes Avoider",
-        short_desc: "Minimizes trapped empty cells",
-        algorithm: "Counts empty cells with 3+ filled neighbors. Score = -10 * holes.",
-        complexity: "O(n + 64)",
-        category: "Defensive",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            let holes = 0;
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    if (!sim.board.grid[row][col]) {
-                        let neighbors = 0;
-                        [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc]) => {
-                            const nr = row+dr, nc = col+dc;
-                            if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || sim.board.grid[nr]?.[nc]) neighbors++;
-                        });
-                        if (neighbors >= 3) holes++;
-                    }
-                }
-            }
-            return -holes * 10 + r.lines * 30;
-        }
-    },
-    near_complete: {
-        name: "Near Complete",
-        short_desc: "Targets rows/columns with 6+ cells",
-        algorithm: "Scores near-complete lines (6+ filled). Sets up future clears.",
-        complexity: "O(n + 16)",
-        category: "Strategic",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            if (r.lines > 0) return 100 + r.lines * 50;
-            let score = 0;
-            for (let i = 0; i < 8; i++) {
-                const rowSum = sim.board.grid[i].reduce((a,b) => a+b, 0);
-                const colSum = sim.board.grid.reduce((a,row) => a + row[i], 0);
-                if (rowSum >= 6) score += (rowSum - 5) * 2;
-                if (colSum >= 6) score += (colSum - 5) * 2;
-            }
-            return score;
-        }
-    },
-    balanced: {
-        name: "Balanced",
-        short_desc: "Multi-factor weighted evaluation",
-        algorithm: "Combines score, lines, combo, space, and flexibility with weights.",
-        complexity: "O(n * m)",
-        category: "Strategic",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            return r.points * 1 + r.lines * 10 + r.combo * 5 + sim.board.countEmpty() * 0.5 + sim.getValidMoves().length * 0.3;
-        }
-    },
-    aggressive: {
-        name: "Aggressive",
-        short_desc: "Maximizes score with risk tolerance",
-        algorithm: "Heavily weights points and combos. Ignores board safety.",
-        complexity: "O(n)",
-        category: "Aggressive",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            let score = r.points * 2 + r.combo * 15 + r.lines * 25;
-            if (r.lines >= 2) score += 50;
-            return score;
-        }
-    },
-    defensive: {
-        name: "Defensive",
-        short_desc: "Prioritizes survival over scoring",
-        algorithm: "Score = empty_cells * 3 + future_moves * 2. Optimizes for longevity.",
-        complexity: "O(n * m)",
-        category: "Defensive",
-        evaluate: (game, move) => {
-            const sim = game.copy();
-            const r = sim.makeMove(move.blockIdx, move.row, move.col);
-            if (!r) return -1000;
-            return sim.board.countEmpty() * 3 + sim.getValidMoves().length * 2 + r.lines * 20;
+
+            return immediate + bestFuture * 0.4 + empty * 0.3 - holes * 5;
         }
     }
 };
 
 // ============================================================================
-// UI
+// UI STATE
 // ============================================================================
 
-let selectedStrategies = new Set(['greedy', 'survivalist', 'line_hunter']);
+let selectedStrategies = new Set(['tuned_balanced', 'survival_expert', 'combo_master', 'deep_lookahead']);
 let isRunning = false;
 let shouldStop = false;
+let gameHistory = {}; // Track scores per game for charting
+let allTimeStats = {}; // Track all-time stats
+
+// ============================================================================
+// UI FUNCTIONS
+// ============================================================================
 
 function renderStrategyList() {
     const list = document.getElementById('strategy-list');
@@ -797,7 +720,7 @@ function updateBoard(strategyId, grid) {
 
 function updateLeaderboard(stats) {
     const rankings = Object.entries(stats)
-        .map(([id, s]) => ({ id, ...s, avg: s.totalScore / s.games }))
+        .map(([id, s]) => ({ id, ...s, avg: s.games > 0 ? s.totalScore / s.games : 0 }))
         .sort((a, b) => b.wins - a.wins || b.avg - a.avg);
 
     document.getElementById('leaderboard').innerHTML = rankings.map((r, i) => `
@@ -805,16 +728,98 @@ function updateLeaderboard(stats) {
             <div class="lb-rank ${i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : ''}">${i + 1}</div>
             <div class="lb-info">
                 <div class="lb-name">${STRATEGIES[r.id].name}</div>
-                <div class="lb-stats">${r.wins}W | Avg: ${Math.round(r.avg)}</div>
+                <div class="lb-stats">${r.wins}W | Avg: ${Math.round(r.avg)} | High: ${r.highScore || 0}</div>
             </div>
             <div class="lb-score">${Math.round(r.avg)}</div>
         </div>
     `).join('');
 }
 
-function showWinner(strategyId, avgScore) {
+function drawScoreChart(history) {
+    const canvas = document.getElementById('score-chart');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width = canvas.offsetWidth * 2;
+    const height = canvas.height = 120 * 2;
+    ctx.scale(2, 2);
+
+    ctx.clearRect(0, 0, width/2, height/2);
+
+    const strategies = Object.keys(history);
+    if (strategies.length === 0) return;
+
+    const maxScore = Math.max(...strategies.flatMap(s => history[s] || [0])) || 100;
+    const colors = {
+        random: '#888',
+        tuned_balanced: '#4ecdc4',
+        survival_expert: '#ffd93d',
+        combo_master: '#e94560',
+        deep_lookahead: '#6c5ce7'
+    };
+
+    const padding = 5;
+    const chartWidth = width/2 - padding * 2;
+    const chartHeight = height/2 - padding * 2;
+
+    for (const [strategyId, scores] of Object.entries(history)) {
+        if (scores.length < 2) continue;
+        ctx.beginPath();
+        ctx.strokeStyle = colors[strategyId] || '#fff';
+        ctx.lineWidth = 1.5;
+
+        scores.forEach((score, i) => {
+            const x = padding + (i / (scores.length - 1)) * chartWidth;
+            const y = padding + chartHeight - (score / maxScore) * chartHeight;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+}
+
+function drawWinnerChart(history, winnerId) {
+    const canvas = document.getElementById('winner-chart');
+    const ctx = canvas.getContext('2d');
+    const width = 380;
+    const height = 100;
+
+    ctx.clearRect(0, 0, width, height);
+
+    const strategies = Object.keys(history);
+    if (strategies.length === 0) return;
+
+    const maxScore = Math.max(...strategies.flatMap(s => history[s] || [0])) || 100;
+    const colors = {
+        random: '#888',
+        tuned_balanced: '#4ecdc4',
+        survival_expert: '#ffd93d',
+        combo_master: '#e94560',
+        deep_lookahead: '#6c5ce7'
+    };
+
+    for (const [strategyId, scores] of Object.entries(history)) {
+        if (scores.length < 2) continue;
+        ctx.beginPath();
+        ctx.strokeStyle = colors[strategyId] || '#fff';
+        ctx.lineWidth = strategyId === winnerId ? 3 : 1;
+        ctx.globalAlpha = strategyId === winnerId ? 1 : 0.3;
+
+        scores.forEach((score, i) => {
+            const x = (i / (scores.length - 1)) * width;
+            const y = height - (score / maxScore) * height;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function showWinner(strategyId, stats, history) {
     document.getElementById('winner-name').textContent = STRATEGIES[strategyId].name;
-    document.getElementById('winner-score').textContent = `Average Score: ${Math.round(avgScore)}`;
+    document.getElementById('winner-wins').textContent = stats.wins;
+    document.getElementById('winner-avg').textContent = Math.round(stats.totalScore / stats.games);
+    document.getElementById('winner-high').textContent = stats.highScore;
+    drawWinnerChart(history, strategyId);
     document.getElementById('winner-overlay').classList.add('show');
 }
 
@@ -836,7 +841,11 @@ async function runBattle() {
     strategyIds.forEach(id => grid.appendChild(createGameCard(id)));
 
     const stats = {};
-    strategyIds.forEach(id => stats[id] = { wins: 0, totalScore: 0, games: 0 });
+    gameHistory = {};
+    strategyIds.forEach(id => {
+        stats[id] = { wins: 0, totalScore: 0, games: 0, highScore: 0 };
+        gameHistory[id] = [];
+    });
 
     isRunning = true;
     shouldStop = false;
@@ -902,7 +911,7 @@ async function runBattle() {
                     document.getElementById(`turns-${id}`).textContent = game.turn;
                     document.getElementById(`lines-${id}`).textContent = totalLines[id];
 
-                    let explain = result.lines > 0 ? `+${result.points} (${result.lines}L)` : `+${result.points}`;
+                    let explain = result.lines > 0 ? `+${result.points} (${result.lines}L, ${result.combo}x)` : `+${result.points}`;
                     document.getElementById(`explain-${id}`).textContent = explain;
                 }
 
@@ -927,6 +936,9 @@ async function runBattle() {
             card.classList.remove('eliminated');
             stats[id].totalScore += games[id].score;
             stats[id].games++;
+            stats[id].highScore = Math.max(stats[id].highScore, games[id].score);
+            gameHistory[id].push(games[id].score);
+
             if (games[id].score === maxScore) {
                 stats[id].wins++;
                 if (winners.length === 1) card.classList.add('winner');
@@ -936,9 +948,10 @@ async function runBattle() {
         });
 
         updateLeaderboard(stats);
+        drawScoreChart(gameHistory);
         document.getElementById('progress-fill').style.width = (gameNum / numGames * 100) + '%';
 
-        if (gameNum < numGames && !shouldStop) await sleep(500);
+        if (gameNum < numGames && !shouldStop) await sleep(400);
     }
 
     // Final winner
@@ -946,8 +959,8 @@ async function runBattle() {
         .map(([id, s]) => ({ id, ...s, avg: s.totalScore / s.games }))
         .sort((a, b) => b.wins - a.wins || b.avg - a.avg);
 
-    if (finalRankings[0].wins > 0) {
-        showWinner(finalRankings[0].id, finalRankings[0].avg);
+    if (finalRankings[0].wins > 0 || finalRankings.length > 0) {
+        showWinner(finalRankings[0].id, stats[finalRankings[0].id], gameHistory);
     }
 
     isRunning = false;
